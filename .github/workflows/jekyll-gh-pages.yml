@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      VITE_SIGNALING_URL: ${{ vars.VITE_SIGNALING_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,12 +31,26 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check signaling server URL
+        run: |
+          if [ -z "$VITE_SIGNALING_URL" ]; then
+            echo "Missing repository variable VITE_SIGNALING_URL."
+            echo "Set it to the public HTTPS URL of your Socket.IO signaling server."
+            exit 1
+          fi
+
+          case "$VITE_SIGNALING_URL" in
+            https://*) ;;
+            *)
+              echo "VITE_SIGNALING_URL must use HTTPS and point to the signaling server, not GitHub Pages."
+              exit 1
+              ;;
+          esac
+
       - name: Build for GitHub Pages
         run: |
           npx tsc -b
           npx vite build --base=/video-kiss-call/
-        env:
-          VITE_SIGNALING_URL: "https://homelander111111332.github.io/video-kiss-call/"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
