@@ -33,6 +33,8 @@ jobs:
         run: |
           npx tsc -b
           npx vite build --base=/video-kiss-call/
+        env:
+          VITE_SIGNALING_URL: ${{ vars.VITE_SIGNALING_URL }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
